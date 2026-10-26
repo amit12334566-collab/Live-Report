@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Live Room Command Center · MSR ITV</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f1ea;--card:#fff;--ink:#14161f;--mut:#6b7080;--line:#e5e1d8;--gold:#b8893a;--live:#12a76b;--iss:#e8a317;--ren:#8c93a6;--sh:0 8px 30px rgba(20,22,31,.07);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0d14;--card:#141824;--ink:#f1efe8;--mut:#8b91a5;--line:#232a3b;--gold:#d9b46a;--live:#2fd596;--iss:#ffb829;--ren:#6f7790;--sh:0 10px 40px rgba(0,0,0,.45)}}
+:root[data-theme="dark"]{--bg:#0b0d14;--card:#141824;--ink:#f1efe8;--mut:#8b91a5;--line:#232a3b;--gold:#d9b46a;--live:#2fd596;--iss:#ffb829;--ren:#6f7790;--sh:0 10px 40px rgba(0,0,0,.45)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+.w{max-width:1180px;margin:0 auto;padding:22px 16px 40px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.eye{color:var(--gold);font-size:11px;letter-spacing:.2em;font-weight:700;text-transform:uppercase}
+h1{margin:4px 0 0;font-size:clamp(24px,4vw,36px);font-weight:800;letter-spacing:-.02em}
+.sub{color:var(--mut);font-size:13px}
+.btn{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font:600 12px Inter,sans-serif;cursor:pointer}
+.g{display:grid;gap:14px}.k{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.c{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--sh)}
+.kl{color:var(--mut);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.kv{font-size:40px;font-weight:800;letter-spacing:-.03em;margin:4px 0 2px;line-height:1.1}
+.kn{font-size:12px;color:var(--mut)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.hero{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:center;margin:14px 0}
+@media(max-width:700px){.hero{grid-template-columns:1fr}}
+.ring{position:relative;width:220px;height:220px;margin:auto}
+.ring svg{transform:rotate(-90deg)}
+.ring .m{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring b{font-size:44px;font-weight:800;letter-spacing:-.03em}
+.ring span{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.12em}
+h2{font-size:16px;margin:0 0 4px;font-weight:700}
+.bar{display:flex;height:16px;border-radius:99px;overflow:hidden;background:var(--line);margin:12px 0}
+.bar i{display:block;height:100%}
+.leg{display:flex;gap:18px;flex-wrap:wrap;font-size:13px}
+.fr{display:grid;grid-template-columns:44px 1fr 74px;gap:10px;align-items:center;padding:5px 0;cursor:pointer;border-radius:8px}
+.fr:hover{background:color-mix(in srgb,var(--gold) 10%,transparent)}
+.fr b{font-size:13px}.fr .t{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--line)}
+.fr .t i{height:100%}.fr small{color:var(--mut);text-align:right;font-size:12px}
+.two{grid-template-columns:1fr 1.5fr}@media(max-width:900px){.two{grid-template-columns:1fr}}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px;align-items:center}
+.chip{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:6px 13px;font:600 12px Inter,sans-serif;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+input{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font:500 13px Inter,sans-serif;width:150px;outline:none}
+.map{max-height:560px;overflow:auto}
+.row{display:flex;gap:10px;align-items:center;margin:4px 0}
+.fl{width:30px;flex:none;font-weight:700;font-size:12px;color:var(--mut)}
+.rs{display:flex;flex-wrap:wrap;gap:4px}
+.r{min-width:42px;text-align:center;font-size:11px;font-weight:600;padding:5px 0;border-radius:8px;color:#fff}
+.r.L{background:var(--live)}.r.I{background:var(--iss);color:#241a00}.r.R{background:var(--ren)}
+.r.dim{opacity:.1}.r.hit{outline:2px solid var(--gold);outline-offset:1px}
+.ins li{margin:7px 0}.ins{padding-left:18px;margin:8px 0 0}
+.note{font-size:12px;color:var(--mut);margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.ring circle#a1{transition:stroke-dasharray .8s ease}.r{cursor:pointer;user-select:none}.gold{background:var(--gold);color:#1a1405;border-color:var(--gold)}#st{font-size:12px;color:var(--mut);margin:0 0 14px}.r:hover{transform:scale(1.08)}#mc.full{position:fixed;inset:0;z-index:50;border-radius:0;overflow:auto;padding:calc(18px + env(safe-area-inset-top,0px)) 24px 24px}#mc.full .map{max-height:none;overflow:visible}#mc.full .r{min-width:64px;font-size:15px;padding:10px 0;border-radius:10px}#mc.full .fl{width:44px;font-size:15px}#mc.full .rs{gap:6px}#mc.full .row{margin:8px 0}#mc.full .note{display:none}</style></head><body><div class="w">
+<header><div><div class="eye">MSR ITV · Live Room Report</div><h1>Room Command Center</h1><div class="sub" id="sub"></div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn gold" id="up">⬆ Upload updated Excel</button><button class="btn gold" id="dl" hidden>⬇ Download Matrix Excel</button><button class="btn" id="rs">↺ Reset</button><button class="btn" id="th">◐ Theme</button><input type="file" id="fi" accept=".xlsx,.xls" hidden></div></header>
+<div id="st"></div>
+<div class="g k">
+<div class="c"><div class="kl"><span class="dot" style="background:var(--live)"></span>Live rooms</div><div class="kv" id="kl"></div><div class="kn">Working and on air</div></div>
+<div class="c"><div class="kl"><span class="dot" style="background:var(--iss)"></span>Internet issues</div><div class="kv" id="ki"></div><div class="kn">Need engineer attention</div></div>
+<div class="c"><div class="kl"><span class="dot" style="background:var(--ren)"></span>Renovation</div><div class="kv" id="kr"></div><div class="kn">Floors 21 and 22</div></div>
+<div class="c"><div class="kl"><span class="dot" style="background:var(--gold)"></span>Total rooms</div><div class="kv" id="kt"></div><div class="kn" id="kn"></div></div>
+</div>
+<div class="c hero">
+<div class="ring"><svg width="220" height="220" viewBox="0 0 220 220"><circle cx="110" cy="110" r="92" fill="none" stroke="var(--line)" stroke-width="20"/><circle id="a1" cx="110" cy="110" r="92" fill="none" stroke="var(--live)" stroke-width="20" stroke-linecap="round" stroke-dasharray="0 600"/></svg><div class="m"><b id="pct"></b><span>Live health</span></div></div>
+<div><h2>Overall health</h2><div class="sub">Live rooms out of rooms in service (renovation excluded)</div>
+<div class="bar" id="bar"></div><div class="leg" id="leg"></div><ul class="ins" id="ins"></ul></div></div>
+<div class="g two">
+<div class="c"><h2>Floor-by-floor health</h2><div class="sub">Tap a floor to highlight it on the map</div><div id="fb" style="margin-top:8px"></div></div>
+<div class="c" id="mc"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h2>Interactive room map</h2><button class="btn" id="fs">⛶ Expand full screen</button></div><div class="sub">Tap any room to change its status by hand: Live → Issue → Renovation</div>
+<div class="tools"><button class="chip on" data-f="A">All</button><button class="chip" data-f="L">Live</button><button class="chip" data-f="I">Issues</button><button class="chip" data-f="R">Renovation</button><input id="q" placeholder="Room no. e.g. 1506" inputmode="numeric"></div>
+<div class="map" id="map"></div>
+<div class="note"><b>How to update:</b> (1) Upload your updated Excel: rooms come from “Master Matrix”, issue rooms from “Internet Issues List”, floors 21 and 22 are renovation. (2) Or tap rooms manually. Changes are remembered in this browser. (3) Press <b>Download Matrix Excel</b> to get the updated workbook in your original format.</div></div>
+</div></div>
+<script>
+const BASE=["1001L","1002L","1003L","1004L","1005L","1006I","1007L","1008I","1009L","1010I","1011L","1012L","1014L","1015L","1016L","1017L","1101I","1102I","1103L","1104I","1105L","1106I","1107L","1108L","1109L","1110L","1111I","1112L","1114L","1115I","1116L","1117L","1201L","1202L","1203I","1204L","1205I","1206L","1207L","1208L","1209L","1210L","1211L","1212I","1214L","1215L","1216I","1217L","1401I","1402I","1403I","1404L","1405L","1415L","1416I","1417L","1501I","1502I","1503I","1504L","1505I","1506I","1507L","1508L","1509L","1510L","1511L","1512L","1514L","1515L","1516L","1517L","1601I","1602I","1603I","1604L","1605L","1606I","1607L","1608L","1609L","1610I","1611L","1612L","1614I","1615I","1616I","1617L","1701L","1702L","1703L","1704L","1705L","1706L","1707L","1708L","1709L","1710L","1711L","1712L","1714L","1715L","1716L","1717L","1801L","1802L","1803L","1804L","1805L","1806L","1807L","1808L","1809L","1810L","1811L","1812I","1814I","1815L","1816L","1817L","1901L","1902L","1903L","1904L","1905L","1906L","1907L","1908L","1909L","1910L","1911L","1912L","1914L","1915L","1916L","1917L","2001L","2002L","2003L","2004I","2005L","2006L","2007L","2008L","2009L","2010L","2011I","2012L","2014L","2015L","2016L","2017L","2101R","2102R","2103R","2104R","2105R","2106R","2107R","2108R","2109R","2110R","2111R","2112R","2114R","2115R","2116R","2117R","2201R","2202R","2203R","2205R","2207R","2208R","2209R","2210R","2211R","2212R","2215R","2217R","2301L","2302L","2303I","2305I","2307L","2308L","2309L","2310L","2311L","2312L","2315L","2317L","2401L","2402I","2404L","2405L","2406L","2408I","2409I","2410L","2411L","2414L","2415L","2416L","2501L","2502L","2504I","2505I","2506L","2508L","2509L","2510L","2511L","2514L","2515L","2516L","2601L","2602L","2604L","2605L","2615L","2616L","2703L","2704I","2705L","2706L","2707L","2712L","2714L","2715L","2716L","2803/TL","2804I","2807I","2808L","2812I","2814L","2817L","2903L","2904L","2909L","2915L"],RENO=[21,22],cl={L:'Live',I:'Issue',R:'Renovation'},KEY='msr_rooms_v1';
+let rooms=BASE.map(x=>({n:x.slice(0,-1),s:x.slice(-1)})),meta='Built-in data from your uploaded report',st='A',fx=null;
+const fl=r=>parseInt(r.n.slice(0,2));
+try{const sv=JSON.parse(localStorage.getItem(KEY)||'null');if(sv&&sv.rooms&&sv.rooms.length){rooms=sv.rooms;meta=sv.meta}}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({rooms,meta}))}catch(e){}};
+const $=i=>document.getElementById(i);
+function cnt(a){const o={L:0,I:0,R:0};a.forEach(r=>o[r.s]++);return o}
+function render(){
+const o=cnt(rooms),T=rooms.length,pc=v=>(v/T*100).toFixed(1);
+$('kl').textContent=o.L;$('ki').textContent=o.I;$('kr').textContent=o.R;$('kt').textContent=T;$('kn').textContent=Object.keys(by()).length+' floors';
+$('sub').textContent=T+' rooms · '+meta;
+const h=o.L+o.I?o.L/(o.L+o.I)*100:0,c=2*Math.PI*92;
+$('a1').setAttribute('stroke-dasharray',(c*h/100)+' '+c);$('pct').textContent=h.toFixed(1)+'%';
+$('bar').innerHTML=`<i style="width:${pc(o.L)}%;background:var(--live)"></i><i style="width:${pc(o.I)}%;background:var(--iss)"></i><i style="width:${pc(o.R)}%;background:var(--ren)"></i>`;
+$('leg').innerHTML=`<span><span class="dot" style="background:var(--live)"></span>Live ${pc(o.L)}%</span><span><span class="dot" style="background:var(--iss)"></span>Issues ${pc(o.I)}%</span><span><span class="dot" style="background:var(--ren)"></span>Renovation ${pc(o.R)}%</span>`;
+const B=by(),fs=Object.keys(B).sort((a,b)=>b-a),w=fs.map(f=>[f,cnt(B[f]).I]).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>0).slice(0,3);
+const clean=fs.filter(f=>{const k=cnt(B[f]);return !k.I&&!k.R});
+$('ins').innerHTML=(w.length?`<li><b>Hotspots:</b> ${w.map(x=>'Floor '+x[0]+' ('+x[1]+')').join(', ')}.</li>`:'<li><b>No open issues.</b></li>')+`<li><b>Fully live floors:</b> ${clean.length?clean.join(', '):'none'}.</li>`;
+$('fb').innerHTML='';fs.forEach(f=>{const k=cnt(B[f]),t=B[f].length,d=document.createElement('div');d.className='fr';d.innerHTML=`<b>F${f}</b><div class="t"><i style="width:${k.L/t*100}%;background:var(--live)"></i><i style="width:${k.I/t*100}%;background:var(--iss)"></i><i style="width:${k.R/t*100}%;background:var(--ren)"></i></div><small>${k.I?k.I+' issue'+(k.I>1?'s':''):k.R?'renovation':'all live'}</small>`;d.onclick=()=>{fx=fx===f?null:f;draw()};$('fb').appendChild(d)});
+draw()}
+function by(){const B={};rooms.forEach(r=>(B[fl(r)]=B[fl(r)]||[]).push(r));return B}
+function draw(){const m=$('map'),q=$('q').value.trim(),B=by();m.innerHTML='';
+Object.keys(B).sort((a,b)=>b-a).forEach(f=>{const r=document.createElement('div');r.className='row';r.innerHTML=`<div class="fl">${f}</div>`;const s=document.createElement('div');s.className='rs';
+B[f].forEach(x=>{const e=document.createElement('div');e.className='r '+x.s;e.textContent=x.n;e.title=x.n+' · '+cl[x.s];
+if((st!='A'&&st!=x.s)||(fx&&fx!==f))e.classList.add('dim');if(q&&x.n.includes(q))e.classList.add('hit');else if(q)e.classList.add('dim');
+e.onclick=()=>{x.s={L:'I',I:'R',R:'L'}[x.s];meta='Edited manually · '+new Date().toLocaleString();save();render()};s.appendChild(e)});
+r.appendChild(s);m.appendChild(r)})}
+function msg(t,bad){$('st').textContent=t;$('st').style.color=bad?'var(--iss)':'var(--live)'}
+function load(file){const rd=new FileReader();rd.onload=ev=>{try{
+const wb=XLSX.read(ev.target.result,{type:'array'});
+const mk=wb.SheetNames.find(n=>/matrix/i.test(n))||wb.SheetNames[0],ik=wb.SheetNames.find(n=>/issue/i.test(n));
+const M=XLSX.utils.sheet_to_json(wb.Sheets[mk],{header:1,defval:null}),iss=new Set();
+if(ik)XLSX.utils.sheet_to_json(wb.Sheets[ik],{header:1,defval:null}).forEach(r=>{const v=parseInt(r[1]);if(r[0]!==null&&!isNaN(v)&&/^\d{4}$/.test(String(r[1]).trim()))iss.add(v)});
+const out=[];M.forEach((row,i)=>{if(i<2)return;row.slice(0,16).forEach(v=>{if(v===null)return;const s=String(v).trim();if(!/^\d{4}(\/\w+)?$/.test(s))return;const f=parseInt(s.slice(0,2));out.push({n:s,s:RENO.includes(f)?'R':iss.has(parseInt(s))?'I':'L'})})});
+if(out.length<10)throw new Error('No room numbers found in the matrix sheet');
+rooms=out;meta=file.name+' · '+new Date(file.lastModified||Date.now()).toLocaleString();fx=null;save();render();msg('✓ Updated from '+file.name+': '+out.length+' rooms, '+iss.size+' rooms on the issue list.')}catch(err){msg('Could not read this file: '+err.message,1)}};rd.readAsArrayBuffer(file)}
+$('up').onclick=()=>$('fi').click();$('fi').onchange=e=>{if(e.target.files[0])load(e.target.files[0]);e.target.value=''};
+$('rs').onclick=()=>{rooms=BASE.map(x=>({n:x.slice(0,-1),s:x.slice(-1)}));meta='Built-in data from your uploaded report';fx=null;try{localStorage.removeItem(KEY)}catch(e){}render();msg('Reset to the original report data.')};
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));b.classList.add('on');st=b.dataset.f;draw()});
+$('q').oninput=draw;
+$('th').onclick=()=>{const r=document.documentElement,d=matchMedia('(prefers-color-scheme: dark)').matches;const cur=r.dataset.theme||(d?'dark':'light');r.dataset.theme=cur==='dark'?'light':'dark'};
+const CM={L:'FFC6EFCE',I:'FFFFEB9C',R:'FFEEECE1'};
+const colOf=n=>{const s=parseInt(n.slice(2,4));return s<=12?s-1:s-2};
+async function buildXlsx(){
+const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('Master Matrix'),o=cnt(rooms),B=by(),fs=Object.keys(B).map(Number).sort((a,b)=>a-b);
+const bd={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
+ws.getCell('A1').value='Live Room MSR ITV';ws.getCell('A1').font={bold:true,size:14};
+for(let i=1;i<=16;i++)ws.getColumn(i).width=9;ws.getColumn(17).width=3;ws.getColumn(18).width=48;ws.getColumn(19).width=10;
+fs.forEach((f,i)=>B[f].forEach(r=>{const c=ws.getCell(3+i,colOf(r.n)+1);c.value=/^\d+$/.test(r.n)?Number(r.n):r.n;c.fill={type:'pattern',pattern:'solid',fgColor:{argb:CM[r.s]}};c.alignment={horizontal:'center',vertical:'middle'};c.border=bd;c.font={bold:true}}));
+const L=[['DASHBOARD & LEGEND',null,'FFE7E6E6'],['Current live room',o.L,CM.L],['Renovation (Floor 21,16 ROOM &Floor 22 , 12 ROOM):',o.R,'FFD9D9D9'],['Total Internet Issues:',o.I,CM.I],['Room Unlive On Guest Request',0,'FFFFFF00'],['GRAND TOTAL ROOMS:',{formula:'SUM(S3:S6)',result:rooms.length},'FFE7E6E6']];
+L.forEach((x,i)=>{const a=ws.getCell(2+i,18),b=ws.getCell(2+i,19);a.value=x[0];a.font={bold:true};a.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE7E6E6'}};a.border=bd;if(x[1]!==null){b.value=x[1];b.fill={type:'pattern',pattern:'solid',fgColor:{argb:x[2]}};b.font={bold:true};b.alignment={horizontal:'center'};b.border=bd}});
+const w2=wb.addWorksheet('Internet Issues List');w2.mergeCells('A1:D1');w2.getCell('A1').value='Room-wise Internet Connectivity Issue Report';w2.getCell('A1').font={bold:true,size:14};w2.getCell('A1').alignment={horizontal:'center'};
+[8,12,32,70].forEach((w,i)=>w2.getColumn(i+1).width=w);
+['S.No','Room No','Issue Type','Remarks'].forEach((h,i)=>{const c=w2.getCell(3,i+1);c.value=h;c.font={bold:true};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE7E6E6'}};c.border=bd});
+const is=rooms.filter(r=>r.s==='I').map(r=>/^\d+$/.test(r.n)?Number(r.n):r.n).sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true}));
+is.forEach((n,i)=>[i+1,n,'Internet Connectivity Issue','Room internet/network not working - reported in Master Matrix'].forEach((v,j)=>{const c=w2.getCell(4+i,j+1);c.value=v;c.border=bd}));
+const e=4+is.length+1;w2.getCell(e,1).value='Total Rooms with Internet Issues:';w2.getCell(e,1).font={bold:true};w2.getCell(e,3).value={formula:'COUNTA(B4:B'+(e-2)+')',result:is.length};w2.getCell(e,3).font={bold:true};
+return wb.xlsx.writeBuffer()}
+(async()=>{let d=null;try{if(window.claude&&claude.use)d=await claude.use('downloads')}catch(e){}try{const b=$('dl');b.hidden=false;
+b.onclick=async()=>{try{b.disabled=true;const buf=await buildXlsx();const fn='Master_Live_Report_'+rooms.length+'_Rooms_Updated.xlsx';if(d)await d.save({filename:fn,data:buf});else{const u=URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));const a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}msg('✓ Updated Matrix Excel ready: '+cnt(rooms).L+' live, '+cnt(rooms).I+' issues, '+cnt(rooms).R+' renovation.')}catch(err){if(err&&err.code!=='declined')msg('Download failed: '+(err.message||err),1)}finally{b.disabled=false}}}catch(e){}})();
+(async()=>{try{const r=await fetch('Master_Live_Report.xlsx?v='+Date.now(),{cache:'no-store'});if(!r.ok)return;const b=await r.blob();if(b.size<500)return;const lm=r.headers.get('last-modified');load(new File([b],'Master_Live_Report.xlsx',{lastModified:lm?Date.parse(lm):Date.now()}))}catch(e){}})();
+const tf=()=>{const m=$('mc'),on=m.classList.toggle('full');document.body.style.overflow=on?'hidden':'';$('fs').textContent=on?'✕ Close full screen':'⛶ Expand full screen'};$('fs').onclick=tf;document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('mc').classList.contains('full'))tf()});
+render();
+</script></body></html>
